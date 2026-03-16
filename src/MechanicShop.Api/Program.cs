@@ -1,18 +1,40 @@
+using System.Text.Json.Serialization;
 using MechanicShop.Application.Interfaces;
 using MechanicShop.Application.Services;
+using MechanicShop.Domain.Enums;
 using MechanicShop.Domain.Interfaces;
 using MechanicShop.Infrastructure.Data;
 using MechanicShop.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter());
+    });
 
-// Configure Database
+
+// Configure Database with Postgres enum mappings
+var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(
+    builder.Configuration.GetConnectionString("DefaultConnection"));
+dataSourceBuilder.MapEnum<WorkOrderState>("workorder_state", new Npgsql.NameTranslation.NpgsqlNullNameTranslator());
+dataSourceBuilder.MapEnum<PaymentStatus>("payment_status", new Npgsql.NameTranslation.NpgsqlNullNameTranslator());
+dataSourceBuilder.MapEnum<UserRole>("user_role", new Npgsql.NameTranslation.NpgsqlNullNameTranslator());
+var dataSource = dataSourceBuilder.Build();
+
 builder.Services.AddDbContext<MechanicShopDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(dataSource, o => 
+    {
+        o.MapEnum<WorkOrderState>("workorder_state");
+        o.MapEnum<PaymentStatus>("payment_status");
+        o.MapEnum<UserRole>("user_role");
+    }));
+
 
 // Register Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

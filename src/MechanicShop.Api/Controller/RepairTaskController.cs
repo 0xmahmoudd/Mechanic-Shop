@@ -46,6 +46,10 @@ namespace MechanicShop.Api.Controller
                 var createdTask = await _repairTaskService.CreateTaskAsync(createDto);
                 return CreatedAtAction(nameof(GetAllTasks), new { }, createdTask);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);

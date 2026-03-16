@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using MechanicShop.Domain.Entities;
 using MechanicShop.Domain.Enums;
@@ -44,9 +44,9 @@ public partial class MechanicShopDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .HasPostgresEnum("payment_status", new[] { "Pending", "Paid", "Cancelled" })
-            .HasPostgresEnum("user_role", new[] { "Manager", "Customer", "Employee" })
-            .HasPostgresEnum("workorder_state", new[] { "Scheduled", "In_Progress", "Completed", "Cancelled" });
+            .HasPostgresEnum<PaymentStatus>(name: "payment_status", nameTranslator: new Npgsql.NameTranslation.NpgsqlNullNameTranslator())
+            .HasPostgresEnum<UserRole>(name: "user_role", nameTranslator: new Npgsql.NameTranslation.NpgsqlNullNameTranslator())
+            .HasPostgresEnum<WorkOrderState>(name: "workorder_state", nameTranslator: new Npgsql.NameTranslation.NpgsqlNullNameTranslator());
 
         modelBuilder.Entity<Customer>(entity =>
         {
@@ -91,8 +91,8 @@ public partial class MechanicShopDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("invoice_pkey");
 
-            entity.Property(e => e.PaymentStatus)
-                .HasConversion<string>();
+            entity.Property(e => e.PaymentStatus);
+
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
@@ -164,8 +164,8 @@ public partial class MechanicShopDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("user_pkey");
 
-            entity.Property(e => e.Role)
-                .HasConversion<string>();
+            entity.Property(e => e.Role);
+
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
@@ -189,8 +189,8 @@ public partial class MechanicShopDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("work_order_pkey");
 
-            entity.Property(e => e.State)
-                .HasConversion<string>();
+            entity.Property(e => e.State);
+
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);

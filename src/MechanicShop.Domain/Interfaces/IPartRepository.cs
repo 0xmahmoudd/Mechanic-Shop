@@ -11,5 +11,6 @@ namespace MechanicShop.Domain.Interfaces
     {
         Task<(IEnumerable<Part> parts, int totalCount)> GetAllPartsAsync(string? category = null, string? supplier = null, string? search = null);
         Task CreatePriceHistoryAsync(int createdPartId, decimal currentCost);
+        Task DeletePriceHistoryAsync(int partId);
     }
 }

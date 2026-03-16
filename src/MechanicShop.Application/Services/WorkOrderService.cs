@@ -171,7 +171,9 @@ namespace MechanicShop.Application.Services
             await _unitOfWork.WorkOrders.UpdateAsync(workOrder);
             await _unitOfWork.SaveChangesAsync();
 
-            return MapToDto(workOrder);
+            // Re-fetch with full details for DTO mapping
+            var updated = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            return MapToDto(updated!);
         }
 
         public async Task<PagedResult<WorkOrderDto>> GetAllWorkOrdersAsync(

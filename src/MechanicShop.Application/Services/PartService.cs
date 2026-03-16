@@ -96,9 +96,15 @@ namespace MechanicShop.Application.Services
             if (part == null)
                 throw new KeyNotFoundException($"Part with ID {partId} not found.");
 
-            await _unitOfWork.Parts.DeleteAsync(partId);
-            await _unitOfWork.SaveChangesAsync();
+            // Delete associated price history records first to avoid FK violation
+            await _partRepository.DeletePriceHistoryAsync(partId);
 
+            // Soft delete
+            part.IsDeleted = true;
+            part.DeletedAt = DateTime.Now;
+            part.UpdatedAt = DateTime.Now;
+            await _unitOfWork.Parts.UpdateAsync(part);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<PagedResult<PartDto>> GetAllPartsAsync(int pageNumber, int pageSize, string? category = null, string? supplier = null, string? search = null)
@@ -124,6 +130,12 @@ namespace MechanicShop.Application.Services
             {
                 throw new KeyNotFoundException($"Part with ID {id} not found.");
             }
+
+            if (part.IsDeleted)
+            {
+                throw new KeyNotFoundException($"Part with ID {id} is deleted.");
+            }
+            
             return MapToDto(part);
         }
 

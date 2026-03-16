@@ -63,6 +63,12 @@ namespace MechanicShop.Application.Services
 
         public async Task<RepairTaskDto> CreateTaskAsync(CreateRepairTaskDto createDto)
         {
+            var existingTasks = await _repairTaskRepository.SearchByNameAsync(createDto.Name);
+            if (existingTasks.Any(t => string.Equals(t.Name, createDto.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new ArgumentException($"A repair task with the name '{createDto.Name}' already exists.");
+            }
+
             var now = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
             
             var repairTask = new RepairTask

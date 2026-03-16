@@ -42,6 +42,16 @@ namespace MechanicShop.Infrastructure.Repositories
             await _context.PartPriceHistories.AddAsync(newPriceHistory);
         }
 
+        public async Task DeletePriceHistoryAsync(int partId)
+        {
+            var priceHistories = await _context.PartPriceHistories
+                .Where(pph => pph.PartId == partId)
+                .ToListAsync();
+
+            _context.PartPriceHistories.RemoveRange(priceHistories);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<(IEnumerable<Part> parts, int totalCount)> GetAllPartsAsync(string? category = null, string? supplier = null, string? search = null)
         {
             var query = _dbSet.AsQueryable();

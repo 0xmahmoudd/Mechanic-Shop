@@ -31,7 +31,7 @@ Accept: application/json
 ###
 
 ### Get Part by ID – exists (id=1 Oil Filter)
-GET {{baseUrl}}/Part/1
+GET {{baseUrl}}/Part/17
 Accept: application/json
 
 ###
@@ -42,7 +42,7 @@ Accept: application/json
 
 ###
 
-### ---Create Part
+### Create Part
 POST {{baseUrl}}/Part
 Content-Type: application/json
 
@@ -92,8 +92,8 @@ Content-Type: application/json
 
 ###
 
-### Delete Part (id=11 – the one we created)
-DELETE {{baseUrl}}/Part/11
+### --- Delete Part (id=17 – the one we created)
+DELETE {{baseUrl}}/Part/17
 
 ###
 
@@ -114,7 +114,7 @@ Accept: application/json
 
 ###
 
-### Create Repair Task
+### ---- Create Repair Task
 POST {{baseUrl}}/api/RepairTask
 Content-Type: application/json
 
@@ -329,7 +329,7 @@ Content-Type: application/json
 
 ###
 
-### ----- Change State – NOT FOUND (id=999)
+### Change State – NOT FOUND (id=999)
 PUT {{baseUrl}}/api/work-orders/999/state
 Content-Type: application/json
 
@@ -351,9 +351,9 @@ PUT {{baseUrl}}/api/work-orders/1
 
 ###
 
-### Complete Work Order – SUCCESS (id=2 – is In_Progress)
+### ---- Complete Work Order – SUCCESS (id=2 – is In_Progress)
 ### This should change state to Completed and auto-generate an invoice
-PUT  ----- {{baseUrl}}/api/work-orders/2/complete
+PUT  {{baseUrl}}/api/work-orders/2/complete
 
 ###
 
@@ -398,9 +398,9 @@ Accept: application/json
 
 ###
 
-###  ----- Get Invoice – auto-generated (id=2 – created when WO 2 was completed)
+###  Get Invoice – auto-generated (id=2 – created when WO 2 was completed)
 ### Run the "Complete Work Order – SUCCESS (id=2)" request first!
-GET {{baseUrl}}/api/invoices/2
+GET {{baseUrl}}/api/invoices/1
 Accept: application/json
 
 ###
