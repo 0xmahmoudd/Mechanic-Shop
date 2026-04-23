@@ -230,20 +230,146 @@ namespace MechanicShop.Api.Controller
             }
         }
         [HttpPut("{workOrderId}/complete")]
-        public async Task<ActionResult<WorkOrderDto>> CompleteWorkOrder(int workOrderId)
+        public async Task<ActionResult<WorkOrderDto>> CompleteWorkOrder(int workOrderId, [FromHeader(Name = "X-Employee-Id")] int? employeeId = null)
         {
             try
             {
-                var completedWorkOrder = await _workOrderService.CompleteWorkOrderAsync(workOrderId);
+                var completedWorkOrder = await _workOrderService.CompleteWorkOrderAsync(workOrderId, employeeId);
                 return Ok(completedWorkOrder);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, ex.Message);
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("{workOrderId}/start")]
+        public async Task<ActionResult<WorkOrderDto>> StartWorkOrder(int workOrderId, [FromHeader(Name = "X-Employee-Id")] int employeeId)
+        {
+            if (employeeId <= 0)
+                return BadRequest("Invalid or missing X-Employee-Id header.");
+
+            try
+            {
+                var workOrder = await _workOrderService.StartWorkOrderAsync(workOrderId, employeeId);
+                return Ok(workOrder);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("{workOrderId}/cancel")]
+        public async Task<ActionResult<WorkOrderDto>> CancelWorkOrder(int workOrderId, [FromHeader(Name = "X-Employee-Id")] int employeeId)
+        {
+            if (employeeId <= 0)
+                return BadRequest("Invalid or missing X-Employee-Id header.");
+
+            try
+            {
+                var workOrder = await _workOrderService.CancelWorkOrderAsync(workOrderId, employeeId);
+                return Ok(workOrder);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("{workOrderId}/update-hours")]
+        public async Task<ActionResult<WorkOrderDto>> UpdateHours(int workOrderId, [FromHeader(Name = "X-Employee-Id")] int employeeId, [FromBody] UpdateHoursDto updateDto)
+        {
+            if (employeeId <= 0)
+                return BadRequest("Invalid or missing X-Employee-Id header.");
+
+            if (updateDto == null || updateDto.HoursWorked < 0)
+                return BadRequest("Invalid hours value.");
+
+            try
+            {
+                var workOrder = await _workOrderService.UpdateHoursAsync(workOrderId, employeeId, updateDto.HoursWorked);
+                return Ok(workOrder);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("{workOrderId}/update-part-usage")]
+        public async Task<ActionResult<WorkOrderDto>> UpdatePartUsage(int workOrderId, [FromHeader(Name = "X-Employee-Id")] int employeeId, [FromBody] List<PartUsageUpdateDto> partUsages)
+        {
+            if (employeeId <= 0)
+                return BadRequest("Invalid or missing X-Employee-Id header.");
+
+            if (partUsages == null || !partUsages.Any())
+                return BadRequest("Part usages cannot be null or empty.");
+
+            try
+            {
+                var workOrder = await _workOrderService.UpdatePartUsageAsync(workOrderId, employeeId, partUsages);
+                return Ok(workOrder);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, ex.Message);
             }
             catch (Exception ex)
             {

@@ -13,6 +13,9 @@ namespace MechanicShop.Domain.Interfaces
         IGenericRepository<RepairTask>  RepairTasks { get; }
         IGenericRepository<WorkOrder>  WorkOrders { get; }
         IGenericRepository<Invoice>  Invoices { get; }
+        IGenericRepository<User> Users { get; }
+        IGenericRepository<Customer> Customers { get; }
+        IGenericRepository<Vehicle> Vehicles { get; }
         
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();

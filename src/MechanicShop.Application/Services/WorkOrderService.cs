@@ -139,18 +139,93 @@ namespace MechanicShop.Application.Services
             return MapToDto(workOrder);
         }
 
-        public async Task<WorkOrderDto> CompleteWorkOrderAsync(int workOrderId)
+        public async Task<WorkOrderDto> StartWorkOrderAsync(int workOrderId, int employeeId)
+        {
+            var workOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            if (workOrder == null)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            if (!workOrder.WorkOrderEmployees.Any(woe => woe.EmployeeId == employeeId))
+                throw new UnauthorizedAccessException("Employee is not assigned to this WorkOrder.");
+
+            if (workOrder.State != WorkOrderState.Scheduled)
+                throw new ArgumentException("WorkOrder must be in 'Scheduled' state to be started.");
+
+            await _workOrderRepository.ChangeStateAsync(workOrderId, WorkOrderState.In_Progress);
+            
+            var updatedWorkOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            updatedWorkOrder!.StartAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+            await _unitOfWork.WorkOrders.UpdateAsync(updatedWorkOrder);
+            await _unitOfWork.SaveChangesAsync();
+
+            return MapToDto(updatedWorkOrder);
+        }
+
+        public async Task<WorkOrderDto> CancelWorkOrderAsync(int workOrderId, int employeeId)
+        {
+            var workOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            if (workOrder == null)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            if (!workOrder.WorkOrderEmployees.Any(woe => woe.EmployeeId == employeeId))
+                throw new UnauthorizedAccessException("Employee is not assigned to this WorkOrder.");
+
+            if (workOrder.State != WorkOrderState.In_Progress && workOrder.State != WorkOrderState.Scheduled)
+                throw new ArgumentException("WorkOrder must be in 'Scheduled' or 'In_Progress' state to be canceled.");
+
+            await _workOrderRepository.ChangeStateAsync(workOrderId, WorkOrderState.Cancelled);
+            
+            var updatedWorkOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            updatedWorkOrder!.EndAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+            await _unitOfWork.WorkOrders.UpdateAsync(updatedWorkOrder);
+            await _unitOfWork.SaveChangesAsync();
+
+            return MapToDto(updatedWorkOrder);
+        }
+
+        public async Task<WorkOrderDto> UpdateHoursAsync(int workOrderId, int employeeId, decimal hoursWorked)
+        {
+            var workOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            if (workOrder == null)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            var workOrderEmployee = workOrder.WorkOrderEmployees.FirstOrDefault(woe => woe.EmployeeId == employeeId);
+            if (workOrderEmployee == null)
+                throw new UnauthorizedAccessException("Employee is not assigned to this WorkOrder.");
+
+            if (hoursWorked < 0)
+                throw new ArgumentException("Hours worked cannot be negative.");
+
+            workOrderEmployee.HoursWorked = hoursWorked;
+            workOrder.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+
+            await _unitOfWork.WorkOrders.UpdateAsync(workOrder);
+            await _unitOfWork.SaveChangesAsync();
+
+            var updatedWorkOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            return MapToDto(updatedWorkOrder!);
+        }
+
+        public async Task<WorkOrderDto> CompleteWorkOrderAsync(int workOrderId, int? employeeId = null)
         {
             var workOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
 
             if (workOrder == null)
                 throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
 
+            if (employeeId.HasValue && !workOrder.WorkOrderEmployees.Any(woe => woe.EmployeeId == employeeId.Value))
+                throw new UnauthorizedAccessException("Employee is not assigned to this WorkOrder.");
+
             if (workOrder.State != WorkOrderState.In_Progress)
                 throw new InvalidOperationException($"WorkOrder must be in 'In_Progress' state to be completed. Current state: {workOrder.State}.");
 
             // Change state to Completed
             await _workOrderRepository.ChangeStateAsync(workOrderId, WorkOrderState.Completed);
+
+            var updatedForEndAt = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            updatedForEndAt!.EndAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+            await _unitOfWork.WorkOrders.UpdateAsync(updatedForEndAt);
+            await _unitOfWork.SaveChangesAsync();
 
             // Auto-generate invoice
             await _invoiceRepository.CreateFromWorkOrderAsync(workOrderId);
@@ -260,6 +335,56 @@ namespace MechanicShop.Application.Services
             var workOrders = allWorkOrders.Where(wo => wo.VehicleId == vehicleId);
             
             return workOrders.Select(MapToDto).ToList();
+        }
+
+        public async Task<WorkOrderDto> UpdatePartUsageAsync(int workOrderId, int employeeId, List<PartUsageUpdateDto> partUsages)
+        {
+            var workOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            if (workOrder == null)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            if (!workOrder.WorkOrderEmployees.Any(woe => woe.EmployeeId == employeeId))
+                throw new UnauthorizedAccessException("Employee is not assigned to this WorkOrder.");
+
+            if (partUsages == null || !partUsages.Any())
+                throw new ArgumentException("Part usages cannot be null or empty.");
+
+            foreach (var usage in partUsages)
+            {
+                if (usage.QuantityUsed < 0)
+                    throw new ArgumentException($"Quantity used cannot be negative for part ID {usage.PartId}.");
+
+                var workOrderPart = workOrder.WorkOrderParts.FirstOrDefault(wop => wop.PartId == usage.PartId);
+                if (workOrderPart == null)
+                    throw new KeyNotFoundException($"Part with ID {usage.PartId} is not associated with this WorkOrder.");
+
+                var part = await _unitOfWork.Parts.GetByIdAsync(usage.PartId);
+                if (part == null)
+                    throw new KeyNotFoundException($"Part with ID {usage.PartId} not found.");
+
+                // Check if we have enough stock (accounting for already used quantity)
+                var additionalQuantityNeeded = usage.QuantityUsed - workOrderPart.QuantityUsed;
+                if (additionalQuantityNeeded > 0 && part.StockQuantity < additionalQuantityNeeded)
+                    throw new ArgumentException($"Insufficient stock for part '{part.Name}'. Available: {part.StockQuantity}, Additional needed: {additionalQuantityNeeded}");
+
+                // Update the work order part quantity
+                workOrderPart.QuantityUsed = usage.QuantityUsed;
+
+                // Decrement stock if quantity increased
+                if (additionalQuantityNeeded > 0)
+                {
+                    part.StockQuantity -= (int)additionalQuantityNeeded;
+                    part.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                    await _unitOfWork.Parts.UpdateAsync(part);
+                }
+            }
+
+            workOrder.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+            await _unitOfWork.WorkOrders.UpdateAsync(workOrder);
+            await _unitOfWork.SaveChangesAsync();
+
+            var updatedWorkOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            return MapToDto(updatedWorkOrder!);
         }
     }
 }

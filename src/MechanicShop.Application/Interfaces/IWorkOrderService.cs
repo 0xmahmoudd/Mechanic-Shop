@@ -29,7 +29,11 @@ namespace MechanicShop.Application.Interfaces
         Task<WorkOrderDto> AddPartsAsync(int workOrderId, List<int> partIds);
         Task<WorkOrderDto> UpdateWorkOrderAsync(int workOrderId);
         Task<WorkOrderDto> ChangeStateAsync(int workOrderId, WorkOrderState newState);
-        Task<WorkOrderDto> CompleteWorkOrderAsync(int workOrderId);
+        Task<WorkOrderDto> StartWorkOrderAsync(int workOrderId, int employeeId);
+        Task<WorkOrderDto> CancelWorkOrderAsync(int workOrderId, int employeeId);
+        Task<WorkOrderDto> UpdateHoursAsync(int workOrderId, int employeeId, decimal hoursWorked);
+        Task<WorkOrderDto> CompleteWorkOrderAsync(int workOrderId, int? employeeId = null);
+        Task<WorkOrderDto> UpdatePartUsageAsync(int workOrderId, int employeeId, List<PartUsageUpdateDto> partUsages);
 
     }
 }

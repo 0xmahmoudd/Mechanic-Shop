@@ -47,9 +47,20 @@ namespace MechanicShop.Api.Controller
         [HttpGet("{id}")]
         public async Task<ActionResult<PartDto>> GetPartById(int id)
         {
-            var part = await _partService.GetPartByIdAsync(id);
-            if (part == null) return NotFound();
-            return Ok(part);
+            try
+            {
+                var part = await _partService.GetPartByIdAsync(id);
+                if (part == null) return NotFound();
+                return Ok(part);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPost]

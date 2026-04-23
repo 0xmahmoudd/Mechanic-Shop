@@ -52,6 +52,7 @@ builder.Services.AddScoped<IRepairTaskService, RepairTaskService>();
 // Add other services as needed
 builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

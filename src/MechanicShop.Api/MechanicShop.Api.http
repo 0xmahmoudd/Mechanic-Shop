@@ -411,3 +411,284 @@ GET {{baseUrl}}/api/invoices/999
 Accept: application/json
 
 ###
+
+
+###############################################################################
+#                           EMPLOYEE ENDPOINTS
+#                     Route: /api/employees and /api/work-orders
+###############################################################################
+
+###
+
+### Get Employee Work Orders (Using X-Employee-Id)
+GET {{baseUrl}}/api/employees/me/work-orders
+Accept: application/json
+X-Employee-Id: 2
+
+###
+
+### Start Work Order (Using X-Employee-Id)
+PUT {{baseUrl}}/api/work-orders/1/start
+X-Employee-Id: 2
+
+###
+
+### Update Hours Worked (Using X-Employee-Id)
+PUT {{baseUrl}}/api/work-orders/1/update-hours
+Content-Type: application/json
+X-Employee-Id: 2
+
+{
+  "hoursWorked": 3.75
+}
+
+###
+
+### Complete Work Order (Using X-Employee-Id)
+PUT {{baseUrl}}/api/work-orders/1/complete
+X-Employee-Id: 2
+
+###
+
+### Cancel Work Order (Using X-Employee-Id)
+PUT {{baseUrl}}/api/work-orders/2/cancel
+X-Employee-Id: 2
+
+###
+
+### Update Part Usage (Using X-Employee-Id)
+PUT {{baseUrl}}/api/work-orders/1/update-part-usage
+Content-Type: application/json
+X-Employee-Id: 2
+
+[
+  {
+    "partId": 1,
+    "quantityUsed": 1
+  },
+  {
+    "partId": 4,
+    "quantityUsed": 2
+  }
+]
+
+###
+
+### Update Part Usage – NOT FOUND work order (id=999)
+PUT {{baseUrl}}/api/work-orders/999/update-part-usage
+Content-Type: application/json
+X-Employee-Id: 2
+
+[
+  {
+    "partId": 1,
+    "quantityUsed": 1
+  }
+]
+
+###
+
+### Update Part Usage – 403 Forbidden (employee not assigned)
+PUT {{baseUrl}}/api/work-orders/1/update-part-usage
+Content-Type: application/json
+X-Employee-Id: 99
+
+[
+  {
+    "partId": 1,
+    "quantityUsed": 1
+  }
+]
+
+###
+
+### Update Part Usage – 400 Bad Request (part not in work order)
+PUT {{baseUrl}}/api/work-orders/1/update-part-usage
+Content-Type: application/json
+X-Employee-Id: 2
+
+[
+  {
+    "partId": 999,
+    "quantityUsed": 1
+  }
+]
+
+###
+
+### Update Part Usage – 400 Bad Request (insufficient stock)
+PUT {{baseUrl}}/api/work-orders/1/update-part-usage
+Content-Type: application/json
+X-Employee-Id: 2
+
+[
+  {
+    "partId": 1,
+    "quantityUsed": 9999
+  }
+]
+
+###
+
+### Update Part Usage – 400 Bad Request (negative quantity)
+PUT {{baseUrl}}/api/work-orders/1/update-part-usage
+Content-Type: application/json
+X-Employee-Id: 2
+
+[
+  {
+    "partId": 1,
+    "quantityUsed": -1
+  }
+]
+
+###
+
+
+###############################################################################
+#                        CUSTOMER ENDPOINTS
+#                   Route: /api/customers and /api/vehicles
+###############################################################################
+
+###
+
+### Register New Customer
+POST {{baseUrl}}/api/customers/register
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "username": "johndoe",
+  "email": "john@example.com",
+  "password": "securepassword",
+  "phoneNumber": "+1234567890"
+}
+
+###
+
+### Register Customer – 400 Bad Request (email already exists)
+POST {{baseUrl}}/api/customers/register
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "username": "janedoe",
+  "email": "youssef@example.com",
+  "password": "password123",
+  "phoneNumber": "+0987654321"
+}
+
+###
+
+### Get Customer Profile (Using X-Customer-Id)
+GET {{baseUrl}}/api/customers/me
+Accept: application/json
+X-Customer-Id: 1
+
+###
+
+### Get Customer Profile – NOT FOUND (id=999)
+GET {{baseUrl}}/api/customers/me
+Accept: application/json
+X-Customer-Id: 999
+
+###
+
+### Update Customer Profile (Using X-Customer-Id)
+PUT {{baseUrl}}/api/customers/me
+Content-Type: application/json
+X-Customer-Id: 1
+
+{
+  "phoneNumber": "+0987654321"
+}
+
+###
+
+### Get Customer Vehicles (Using X-Customer-Id)
+GET {{baseUrl}}/api/customers/me/vehicles
+Accept: application/json
+X-Customer-Id: 1
+
+###
+
+### Add Vehicle to Customer (Using X-Customer-Id)
+POST {{baseUrl}}/api/customers/me/vehicles
+Content-Type: application/json
+X-Customer-Id: 1
+
+{
+  "make": "Honda",
+  "model": "Civic",
+  "year": 2022,
+  "licensePlate": "XYZ789",
+  "vin": "2HGCM82633A654321"
+}
+
+###
+
+### Update Vehicle (Using X-Customer-Id)
+PUT {{baseUrl}}/api/vehicles/1
+Content-Type: application/json
+X-Customer-Id: 1
+
+{
+  "make": "Toyota",
+  "model": "Camry",
+  "year": 2023,
+  "licensePlate": "NEWPLATE",
+  "vin": "1HGCM82633A123456"
+}
+
+###
+
+### Update Vehicle – 404 Not Found (vehicle id=999)
+PUT {{baseUrl}}/api/vehicles/999
+Content-Type: application/json
+X-Customer-Id: 1
+
+{
+  "make": "Honda",
+  "model": "Civic",
+  "year": 2023,
+  "licensePlate": "XYZ789",
+  "vin": "2HGCM82633A654321"
+}
+
+###
+
+### Update Vehicle – 403 Forbidden (vehicle doesn't belong to customer)
+PUT {{baseUrl}}/api/vehicles/2
+Content-Type: application/json
+X-Customer-Id: 1
+
+{
+  "make": "Honda",
+  "model": "Civic",
+  "year": 2023,
+  "licensePlate": "XYZ789",
+  "vin": "2HGCM82633A654321"
+}
+
+###
+
+### Delete Vehicle (Using X-Customer-Id)
+DELETE {{baseUrl}}/api/vehicles/1
+X-Customer-Id: 1
+
+###
+
+### Delete Vehicle – 404 Not Found (vehicle id=999)
+DELETE {{baseUrl}}/api/vehicles/999
+X-Customer-Id: 1
+
+###
+
+### Delete Vehicle – 403 Forbidden (vehicle doesn't belong to customer)
+DELETE {{baseUrl}}/api/vehicles/2
+X-Customer-Id: 1
+
+###
+
