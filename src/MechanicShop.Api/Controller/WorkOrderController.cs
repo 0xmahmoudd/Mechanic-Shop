@@ -376,5 +376,49 @@ namespace MechanicShop.Api.Controller
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpDelete("{workOrderId}/parts/{partId}")]
+        public async Task<ActionResult<WorkOrderDto>> RemovePart(int workOrderId, int partId)
+        {
+            try
+            {
+                var workOrder = await _workOrderService.RemovePartAsync(workOrderId, partId);
+                return Ok(workOrder);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete("{workOrderId}/repair-tasks/{taskId}")]
+        public async Task<ActionResult<WorkOrderDto>> RemoveRepairTask(int workOrderId, int taskId)
+        {
+            try
+            {
+                var workOrder = await _workOrderService.RemoveRepairTaskAsync(workOrderId, taskId);
+                return Ok(workOrder);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

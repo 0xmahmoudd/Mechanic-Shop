@@ -27,6 +27,8 @@ namespace MechanicShop.Application.Interfaces
         Task<WorkOrderDto> AssignEmployeesAsync(int workOrderId, List<int> employeeIds);
         Task<WorkOrderDto> AddRepairTasksAsync(int workOrderId, List<int> taskIds);
         Task<WorkOrderDto> AddPartsAsync(int workOrderId, List<int> partIds);
+        Task<WorkOrderDto> RemovePartAsync(int workOrderId, int partId);
+        Task<WorkOrderDto> RemoveRepairTaskAsync(int workOrderId, int taskId);
         Task<WorkOrderDto> UpdateWorkOrderAsync(int workOrderId);
         Task<WorkOrderDto> ChangeStateAsync(int workOrderId, WorkOrderState newState);
         Task<WorkOrderDto> StartWorkOrderAsync(int workOrderId, int employeeId);

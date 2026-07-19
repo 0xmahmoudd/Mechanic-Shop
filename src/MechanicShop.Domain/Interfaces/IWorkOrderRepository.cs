@@ -15,7 +15,9 @@ namespace MechanicShop.Domain.Interfaces
         Task<(IEnumerable<WorkOrder> Items, int TotalCount)> GetPagedWithDetailsAsync(int pageNumber, int pageSize, string? state, string? search);
         Task AssignEmployeesAsync(int workOrderId, List<int> employeeIds);
         Task AddRepairTasksAsync(int workOrderId, List<int> taskIds);
+        Task RemoveRepairTaskAsync(int workOrderId, int taskId);
         Task AddPartsAsync(int workOrderId, List<int> partIds);
+        Task RemovePartAsync(int workOrderId, int partId);
         Task<bool> ChangeStateAsync(int workOrderId, WorkOrderState newState);
     }
 }

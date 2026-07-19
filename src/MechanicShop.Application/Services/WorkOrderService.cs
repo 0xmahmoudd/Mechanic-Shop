@@ -128,6 +128,36 @@ namespace MechanicShop.Application.Services
             return MapToDto(workOrder);
         }
 
+        public async Task<WorkOrderDto> RemovePartAsync(int workOrderId, int partId)
+        {
+            var workOrder = await _workOrderRepository.GetByIdAsync(workOrderId);
+            if (workOrder == null || workOrder.IsDeleted)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            if (workOrder.State == WorkOrderState.Completed || workOrder.State == WorkOrderState.Cancelled)
+                throw new InvalidOperationException($"Cannot remove parts from a work order in '{workOrder.State}' state.");
+
+            await _workOrderRepository.RemovePartAsync(workOrderId, partId);
+            
+            var updatedWorkOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            return MapToDto(updatedWorkOrder!);
+        }
+
+        public async Task<WorkOrderDto> RemoveRepairTaskAsync(int workOrderId, int taskId)
+        {
+            var workOrder = await _workOrderRepository.GetByIdAsync(workOrderId);
+            if (workOrder == null || workOrder.IsDeleted)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            if (workOrder.State == WorkOrderState.Completed || workOrder.State == WorkOrderState.Cancelled)
+                throw new InvalidOperationException($"Cannot remove repair tasks from a work order in '{workOrder.State}' state.");
+
+            await _workOrderRepository.RemoveRepairTaskAsync(workOrderId, taskId);
+            
+            var updatedWorkOrder = await _workOrderRepository.GetWithDetailsAsync(workOrderId);
+            return MapToDto(updatedWorkOrder!);
+        }
+
         public async Task<WorkOrderDto> ChangeStateAsync(int workOrderId, WorkOrderState newState)
         {
             await _workOrderRepository.ChangeStateAsync(workOrderId, newState);

@@ -174,6 +174,23 @@ namespace MechanicShop.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task RemoveRepairTaskAsync(int workOrderId, int taskId)
+        {
+            var workOrder = await _context.WorkOrders
+                .Include(wo => wo.WorkOrderRepairTasks)
+                .FirstOrDefaultAsync(wo => wo.Id == workOrderId && !wo.IsDeleted);
+
+            if (workOrder == null)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            var repairTaskToRemove = workOrder.WorkOrderRepairTasks.FirstOrDefault(wort => wort.RepairTaskId == taskId);
+            if (repairTaskToRemove != null)
+            {
+                workOrder.WorkOrderRepairTasks.Remove(repairTaskToRemove);
+                workOrder.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                await _context.SaveChangesAsync();
+            }
+        }
         public async Task AddPartsAsync(int workOrderId, List<int> partIds)
         {
             var workOrder = await _context.WorkOrders
@@ -208,6 +225,24 @@ namespace MechanicShop.Infrastructure.Repositories
 
             workOrder.UpdatedAt = now;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePartAsync(int workOrderId, int partId)
+        {
+            var workOrder = await _context.WorkOrders
+                .Include(wo => wo.WorkOrderParts)
+                .FirstOrDefaultAsync(wo => wo.Id == workOrderId && !wo.IsDeleted);
+
+            if (workOrder == null)
+                throw new KeyNotFoundException($"WorkOrder with ID {workOrderId} not found.");
+
+            var partToRemove = workOrder.WorkOrderParts.FirstOrDefault(wop => wop.PartId == partId);
+            if (partToRemove != null)
+            {
+                workOrder.WorkOrderParts.Remove(partToRemove);
+                workOrder.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<bool> ChangeStateAsync(int workOrderId, WorkOrderState newState)
