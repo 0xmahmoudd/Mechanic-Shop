@@ -22,22 +22,7 @@ MechanicShop API provides a centralized backend solution that automates and secu
 
 The following diagram illustrates the core lifecycle of a Work Order within the system:
 
-```mermaid
-graph TD
-    classDef customer fill:#f9d0c4,stroke:#333,stroke-width:2px;
-    classDef manager fill:#d4e157,stroke:#333,stroke-width:2px;
-    classDef employee fill:#81d4fa,stroke:#333,stroke-width:2px;
-    classDef system fill:#b39ddb,stroke:#333,stroke-width:2px;
-
-    A[Customer registers & adds Vehicle]:::customer --> B(Service Request Initiated)
-    B --> C[Work Order Created <br/> State: Scheduled]:::system
-    C --> D[Manager assigns Mechanics, Parts & Tasks]:::manager
-    D --> E[Mechanic starts work <br/> State: In Progress]:::employee
-    E --> F[Mechanic logs hours & part usage]:::employee
-    F --> G[Work marked as Completed <br/> State: Completed]:::manager
-    G --> H{System Auto-Generates Invoice}:::system
-    H --> I[Customer views & pays Invoice]:::customer
-```
+![alt text](image.png)
 
 ## Tech Stack
 
@@ -52,7 +37,7 @@ graph TD
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/0xmahmoudd/Mechanic-Shop.git
    ```
 2. **Setup the Database:**
    Ensure PostgreSQL is running and update the connection string in `appsettings.Development.json`.
