@@ -149,5 +149,32 @@ namespace MechanicShop.Api.Controller
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("{customerId}/vehicles")]
+        public async Task<ActionResult<VehicleDto>> AddVehicleForCustomer(
+            int customerId,
+            [FromBody] CreateVehicleDto dto)
+        {
+            if (customerId <= 0)
+                return BadRequest("Invalid customerId.");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var vehicle = await _customerService.AddVehicleAsync(customerId, dto);
+                // Return 201 Created
+                return CreatedAtAction(nameof(GetCustomerProfile), new { customerId }, vehicle);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
