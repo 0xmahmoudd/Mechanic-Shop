@@ -21,6 +21,7 @@ namespace MechanicShop.Infrastructure.Data
         private IGenericRepository<User> _users;
         private IGenericRepository<Customer> _customers;
         private IGenericRepository<Vehicle> _vehicles;
+        private IEmployeeRepository _employees;
 
 
         public UnitOfWork(MechanicShopDbContext context)
@@ -110,6 +111,18 @@ namespace MechanicShop.Infrastructure.Data
                     _vehicles = new GenericRepository<Vehicle>(_context);
                 }
                 return _vehicles;
+            }
+        }
+
+        public IEmployeeRepository Employees
+        {
+            get
+            {
+                if (_employees == null)
+                {
+                    _employees = new EmployeeRepository(_context);
+                }
+                return _employees;
             }
         }
 

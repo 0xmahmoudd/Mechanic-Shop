@@ -45,6 +45,7 @@ builder.Services.AddScoped<IRepairTaskRepository, RepairTaskRepository>();
 // Add other repositories as needed
 builder.Services.AddScoped<IWorkOrderRepository, WorkOrderRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 // Register Application Services
 builder.Services.AddScoped<IPartService, PartService>();
@@ -53,6 +54,7 @@ builder.Services.AddScoped<IRepairTaskService, RepairTaskService>();
 builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
