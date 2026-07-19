@@ -52,6 +52,57 @@ namespace MechanicShop.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<(IEnumerable<WorkOrder> Items, int TotalCount)> GetPagedWithDetailsAsync(int pageNumber, int pageSize, string? state, string? search)
+        {
+            var query = _context.WorkOrders
+                .AsNoTracking()
+                .Where(wo => !wo.IsDeleted);
+
+            // Apply state filter if provided
+            if (!string.IsNullOrWhiteSpace(state))
+            {
+                if (Enum.TryParse<WorkOrderState>(state, true, out var stateEnum))
+                {
+                    query = query.Where(wo => wo.State == stateEnum);
+                }
+            }
+
+            // Apply search filter if provided
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(wo =>
+                    wo.Vehicle.Make.ToLower().Contains(searchLower) ||
+                    wo.Vehicle.Model.ToLower().Contains(searchLower) ||
+                    (wo.Vehicle.LicensePlate != null && wo.Vehicle.LicensePlate.ToLower().Contains(searchLower)) ||
+                    wo.Vehicle.Customer.User.FirstName.ToLower().Contains(searchLower) ||
+                    wo.Vehicle.Customer.User.LastName.ToLower().Contains(searchLower) ||
+                    wo.Vehicle.Customer.User.Email.ToLower().Contains(searchLower)
+                );
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Include(wo => wo.Vehicle)
+                    .ThenInclude(v => v.Customer)
+                        .ThenInclude(c => c.User)
+                .Include(wo => wo.WorkOrderEmployees)
+                    .ThenInclude(woe => woe.Employee)
+                        .ThenInclude(e => e.User)
+                .Include(wo => wo.WorkOrderRepairTasks)
+                    .ThenInclude(wort => wort.RepairTask)
+                .Include(wo => wo.WorkOrderParts)
+                    .ThenInclude(wop => wop.Part)
+                .Include(wo => wo.Invoice)
+                .OrderByDescending(wo => wo.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
         public async Task AssignEmployeesAsync(int workOrderId, List<int> employeeIds)
         {
             var workOrder = await _context.WorkOrders

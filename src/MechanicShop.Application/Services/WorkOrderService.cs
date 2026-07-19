@@ -257,40 +257,9 @@ namespace MechanicShop.Application.Services
             string? state = null, 
             string? search = null)
         {
-            var allWorkOrders = await _workOrderRepository.GetAllWithDetailsAsync();
+            var (items, totalCount) = await _workOrderRepository.GetPagedWithDetailsAsync(pageNumber, pageSize, state, search);
             
-            // Apply state filter if provided
-            if (!string.IsNullOrWhiteSpace(state))
-            {
-                if (Enum.TryParse<WorkOrderState>(state, true, out var stateEnum))
-                {
-                    allWorkOrders = allWorkOrders.Where(wo => wo.State == stateEnum);
-                }
-            }
-            
-            // Apply search filter if provided
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var searchLower = search.ToLower();
-                allWorkOrders = allWorkOrders.Where(wo =>
-                    wo.Vehicle.Make.ToLower().Contains(searchLower) ||
-                    wo.Vehicle.Model.ToLower().Contains(searchLower) ||
-                    (wo.Vehicle.LicensePlate != null && wo.Vehicle.LicensePlate.ToLower().Contains(searchLower)) ||
-                    wo.Vehicle.Customer.User.FirstName.ToLower().Contains(searchLower) ||
-                    wo.Vehicle.Customer.User.LastName.ToLower().Contains(searchLower) ||
-                    wo.Vehicle.Customer.User.Email.ToLower().Contains(searchLower)
-                );
-            }
-            
-            var workOrdersList = allWorkOrders.ToList();
-            var totalCount = workOrdersList.Count;
-            
-            // Apply pagination
-            var paginatedWorkOrders = workOrdersList
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(MapToDto)
-                .ToList();
+            var paginatedWorkOrders = items.Select(MapToDto).ToList();
             
             return new PagedResult<WorkOrderDto>
             {
