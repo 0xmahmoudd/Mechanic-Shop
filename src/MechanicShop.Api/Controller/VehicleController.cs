@@ -17,6 +17,26 @@ namespace MechanicShop.Api.Controller
             _customerService = customerService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult> GetAllVehicles([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
+        {
+            try
+            {
+                var (items, totalCount) = await _customerService.GetAllVehiclesAsync(pageNumber, pageSize, search);
+                return Ok(new
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpPut("{vehicleId}")]
         public async Task<ActionResult<VehicleDto>> UpdateVehicle(
             int vehicleId,

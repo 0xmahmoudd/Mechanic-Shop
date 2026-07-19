@@ -96,6 +96,13 @@ namespace MechanicShop.Application.Services
             return await GetCustomerProfileAsync(customerId);
         }
 
+        public async Task<(IEnumerable<VehicleDto> Items, int TotalCount)> GetAllVehiclesAsync(int pageNumber, int pageSize, string? search)
+        {
+            var (items, totalCount) = await _unitOfWork.Vehicles.GetPagedVehiclesAsync(pageNumber, pageSize, search);
+            var dtos = items.Select(MapToVehicleDto).ToList();
+            return (dtos, totalCount);
+        }
+
         public async Task<IEnumerable<VehicleDto>> GetCustomerVehiclesAsync(int customerId)
         {
             var allVehicles = await _unitOfWork.Vehicles.GetAllAsync();

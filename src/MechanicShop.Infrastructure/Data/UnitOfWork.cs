@@ -20,7 +20,7 @@ namespace MechanicShop.Infrastructure.Data
         private IGenericRepository<Invoice> _invoice;
         private IGenericRepository<User> _users;
         private ICustomerRepository _customers;
-        private IGenericRepository<Vehicle> _vehicles;
+        private IVehicleRepository _vehicles;
         private IEmployeeRepository _employees;
 
 
@@ -102,13 +102,13 @@ namespace MechanicShop.Infrastructure.Data
             }
         }
 
-        public IGenericRepository<Vehicle> Vehicles
+        public IVehicleRepository Vehicles
         {
             get
             {
                 if (_vehicles == null)
                 {
-                    _vehicles = new GenericRepository<Vehicle>(_context);
+                    _vehicles = new VehicleRepository(_context);
                 }
                 return _vehicles;
             }
