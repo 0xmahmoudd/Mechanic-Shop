@@ -40,6 +40,26 @@ namespace MechanicShop.Api.Controller
             }
         }
 
+        [HttpGet]
+        public async Task<ActionResult> GetAllCustomers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
+        {
+            try
+            {
+                var (items, totalCount) = await _customerService.GetAllCustomersAsync(pageNumber, pageSize, search);
+                return Ok(new
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpGet("me")]
         public async Task<ActionResult<CustomerDto>> GetCustomerProfile([FromHeader(Name = "X-Customer-Id")] int customerId)
         {

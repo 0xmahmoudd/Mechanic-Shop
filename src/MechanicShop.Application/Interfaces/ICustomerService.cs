@@ -9,6 +9,7 @@ namespace MechanicShop.Application.Interfaces
     public interface ICustomerService
     {
         Task<CustomerWithUserDto> RegisterCustomerAsync(RegisterCustomerDto dto);
+        Task<(IEnumerable<CustomerDto> Items, int TotalCount)> GetAllCustomersAsync(int pageNumber, int pageSize, string? search);
         Task<CustomerDto> GetCustomerProfileAsync(int customerId);
         Task<CustomerDto> UpdateCustomerProfileAsync(int customerId, UpdateCustomerProfileDto dto);
         Task<IEnumerable<VehicleDto>> GetCustomerVehiclesAsync(int customerId);

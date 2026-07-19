@@ -46,6 +46,7 @@ builder.Services.AddScoped<IRepairTaskRepository, RepairTaskRepository>();
 builder.Services.AddScoped<IWorkOrderRepository, WorkOrderRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
 // Register Application Services
 builder.Services.AddScoped<IPartService, PartService>();

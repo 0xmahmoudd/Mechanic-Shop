@@ -8,6 +8,7 @@ using MechanicShop.Application.Interfaces;
 using MechanicShop.Domain.Entities;
 using MechanicShop.Domain.Enums;
 using MechanicShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace MechanicShop.Application.Services
 {
@@ -58,6 +59,13 @@ namespace MechanicShop.Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             return MapToCustomerWithUserDto(customer, user);
+        }
+
+        public async Task<(IEnumerable<CustomerDto> Items, int TotalCount)> GetAllCustomersAsync(int pageNumber, int pageSize, string? search)
+        {
+            var (items, totalCount) = await _unitOfWork.Customers.GetPagedCustomersAsync(pageNumber, pageSize, search);
+            var dtos = items.Select(c => MapToDto(c, c.User)).ToList();
+            return (dtos, totalCount);
         }
 
         public async Task<CustomerDto> GetCustomerProfileAsync(int customerId)
