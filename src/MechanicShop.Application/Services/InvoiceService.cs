@@ -51,5 +51,22 @@ namespace MechanicShop.Application.Services
 
             return MapToDto(invoice);
         }
+
+        public async Task<InvoiceDto> PayInvoiceAsync(int invoiceId)
+        {
+            var invoice = await _unitOfWork.Invoices.GetByIdAsync(invoiceId);
+            if (invoice == null || invoice.IsDeleted)
+                throw new KeyNotFoundException($"Invoice with ID {invoiceId} not found.");
+
+            if (invoice.PaymentStatus == Domain.Enums.PaymentStatus.Paid)
+                throw new InvalidOperationException("Invoice is already paid.");
+
+            invoice.PaymentStatus = Domain.Enums.PaymentStatus.Paid;
+
+            await _unitOfWork.Invoices.UpdateAsync(invoice);
+            await _unitOfWork.SaveChangesAsync();
+
+            return MapToDto(invoice);
+        }
     }
 }

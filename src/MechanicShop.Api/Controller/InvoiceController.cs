@@ -56,5 +56,27 @@ namespace MechanicShop.Api.Controller
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPut("{invoiceId}/pay")]
+        public async Task<ActionResult<InvoiceDto>> PayInvoice(int invoiceId)
+        {
+            try
+            {
+                var invoice = await _invoiceService.PayInvoiceAsync(invoiceId);
+                return Ok(invoice);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

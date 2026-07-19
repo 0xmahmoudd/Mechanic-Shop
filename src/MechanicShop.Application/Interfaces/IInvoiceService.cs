@@ -10,5 +10,6 @@ namespace MechanicShop.Application.Interfaces
     {
         Task<(IEnumerable<InvoiceDto> Items, int TotalCount)> GetAllInvoicesAsync(int pageNumber, int pageSize, string? search);
         Task<InvoiceDto> GetInvoiceByIdAsync(int invoiceId);
+        Task<InvoiceDto> PayInvoiceAsync(int invoiceId);
     }
 }
