@@ -89,5 +89,28 @@ namespace MechanicShop.Infrastructure.Repositories
 
             return invoice;
         }
+        public async Task<(IEnumerable<Invoice> Items, int TotalCount)> GetPagedInvoicesAsync(int pageNumber, int pageSize, string? search)
+        {
+            var query = _dbSet.AsNoTracking().Where(i => !i.IsDeleted);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                // We can't easily search WorkOrder.Customer here without Includes, so let's add them.
+            }
+
+            // Always include WorkOrder for invoice details if needed
+            query = query.Include(i => i.WorkOrder);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(i => i.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using MechanicShop.Domain.Entities;
 using MechanicShop.Domain.Enums;
+using static MechanicShop.Domain.Interfaces.IGenericRepository;
 
 namespace MechanicShop.Domain.Interfaces
 {
-    public interface IWorkOrderRepository : IGenericRepository
+    public interface IWorkOrderRepository : IGenericRepository<WorkOrder>
     {
         Task<WorkOrder?> GetWithDetailsAsync(int id);
         Task<IEnumerable<WorkOrder>> GetAllWithDetailsAsync();

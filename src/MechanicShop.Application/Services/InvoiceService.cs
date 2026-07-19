@@ -6,6 +6,7 @@ using MechanicShop.Application.DTO.Invoice;
 using MechanicShop.Application.Interfaces;
 using MechanicShop.Domain.Entities;
 using MechanicShop.Domain.Interfaces;
+using System.Linq;
 
 namespace MechanicShop.Application.Services
 {
@@ -33,6 +34,13 @@ namespace MechanicShop.Application.Services
             IssuedAt = invoice.IssuedAt,
             CreatedAt = invoice.CreatedAt
         };
+
+        public async Task<(IEnumerable<InvoiceDto> Items, int TotalCount)> GetAllInvoicesAsync(int pageNumber, int pageSize, string? search)
+        {
+            var (items, totalCount) = await _unitOfWork.Invoices.GetPagedInvoicesAsync(pageNumber, pageSize, search);
+            var dtos = items.Select(MapToDto).ToList();
+            return (dtos, totalCount);
+        }
 
         public async Task<InvoiceDto> GetInvoiceByIdAsync(int invoiceId)
         {

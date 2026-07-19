@@ -11,8 +11,8 @@ namespace MechanicShop.Domain.Interfaces
     {
         IGenericRepository<Part> Parts { get; }
         IGenericRepository<RepairTask>  RepairTasks { get; }
-        IGenericRepository<WorkOrder>  WorkOrders { get; }
-        IGenericRepository<Invoice>  Invoices { get; }
+        IWorkOrderRepository WorkOrders { get; }
+        IInvoiceRepository Invoices { get; }
         IGenericRepository<User> Users { get; }
         IEmployeeRepository Employees { get; }
         ICustomerRepository Customers { get; }

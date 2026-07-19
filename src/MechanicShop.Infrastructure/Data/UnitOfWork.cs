@@ -16,8 +16,8 @@ namespace MechanicShop.Infrastructure.Data
         private IDbContextTransaction? _transaction;
         private IGenericRepository<Part> _parts;
         private IGenericRepository<RepairTask> _repairTasks;
-        private IGenericRepository<WorkOrder> _workOrder;
-        private IGenericRepository<Invoice> _invoice;
+        private IWorkOrderRepository _workOrder;
+        private IInvoiceRepository _invoice;
         private IGenericRepository<User> _users;
         private ICustomerRepository _customers;
         private IVehicleRepository _vehicles;
@@ -54,25 +54,25 @@ namespace MechanicShop.Infrastructure.Data
             }
         }
 
-        public IGenericRepository<WorkOrder> WorkOrders
+        public IWorkOrderRepository WorkOrders
         {
             get
             {
                 if (_workOrder == null)
                 {
-                    _workOrder = new GenericRepository<WorkOrder>(_context);
+                    _workOrder = new WorkOrderRepository(_context);
                 }
                 return _workOrder;
             }
         }
 
-        public IGenericRepository<Invoice> Invoices
+        public IInvoiceRepository Invoices
         {
             get
             {
                 if (_invoice == null)
                 {
-                    _invoice = new GenericRepository<Invoice>(_context);
+                    _invoice = new InvoiceRepository(_context);
                 }
                 return _invoice;
             }
